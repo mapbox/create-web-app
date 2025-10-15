@@ -5,6 +5,8 @@ import { execa } from "execa";
 import { existsSync, promises as fs } from "fs";
 import { replaceTokenInFiles } from "./replaceToken.js";
 import open from "open";
+import { createTutorialTemplate } from "./utils/createTutorialTemplate.js";
+import { createMinimalTemplate } from "./utils/createMinimalTemplate.js";
 
 
 async function run() {
@@ -19,6 +21,19 @@ async function run() {
       choices: ["React", "Vue", "Svelte", "Angular"]
     }
   ]);
+
+  const frameworkLower = framework.toLowerCase();
+
+  // Step 3: Template Type
+  const { templateType } = await inquirer.prompt([{
+    type: "list",
+    name: "templateType", 
+    message: "Choose template type:",
+    choices: [
+      "Example App - simple app demonstrating state management, event handling and 2-way interactivity.",
+      "Minimal setup - just a full-screen map"
+    ]
+  }]);
 
   // Step 2: Project name
   const { projectName } = await inquirer.prompt([
@@ -45,60 +60,12 @@ async function run() {
     }
   ]);
 
-  // Step 4: Clone template from tutorials repo subfolder using git clone
-  const frameworkLower = framework.toLowerCase();
-  const repo = `mapbox/tutorials`;
-  const subfolder = `use-mapbox-gl-js-with-${frameworkLower}`;
-  const repoUrl = `https://github.com/${repo}.git`;
-  const tempDir = `temp-${Date.now()}`;
-  
-  console.log(chalk.gray(`\n📦 Downloading template from ${repo}/${subfolder}...\n`));
 
-  try {
-    // Step 4a: Shallow clone the entire repo
-    console.log(chalk.blue('� Cloning repository...'));
-    await execa('git', ['clone', '--depth', '1', repoUrl, tempDir], {
-      stdio: 'pipe' // Hide git output for cleaner experience
-    });
-
-    // Step 4b: Copy the specific subfolder to project directory
-    console.log(chalk.blue('📁 Extracting template files...'));
-    const { existsSync } = await import('fs');
-    const subfolderPath = `${tempDir}/${subfolder}`;
-    
-    if (!existsSync(subfolderPath)) {
-      throw new Error(`Template folder '${subfolder}' not found in repository`);
-    }
-
-    await execa('cp', ['-r', subfolderPath, projectName], { stdio: 'pipe' });
-
-    // Step 4c: Clean up temporary directory
-    console.log(chalk.blue('🧹 Cleaning up...'));
-    await execa('rm', ['-rf', tempDir], { stdio: 'pipe' });
-
-    console.log(chalk.green('✅ Template downloaded successfully'));
-  } catch (error) {
-    // Clean up temp directory if it exists
-    try {
-      await execa('rm', ['-rf', tempDir], { stdio: 'pipe' });
-    } catch (cleanupError) {
-      // Ignore cleanup errors
-    }
-
-    console.log(chalk.red(`\n❌ Failed to download template: ${error.message}`));
-    
-    if (error.message.includes('not found')) {
-      console.log(chalk.yellow(`\n💡 Available framework options:`));
-      console.log(chalk.gray(`   - react`));
-      console.log(chalk.gray(`   - vue`));
-      console.log(chalk.gray(`   - svelte`));
-      console.log(chalk.gray(`   - angular`));
-    } else {
-      console.log(chalk.yellow(`\n💡 This might be a network connectivity issue.`));
-      console.log(chalk.gray(`Make sure you have internet access and git is installed.`));
-    }
-    
-    throw error;
+  // Step 4: Clone template from tutorials repo OR Minimal framework templates in /templates/
+  if(templateType.includes('Minimal')) {
+    await createMinimalTemplate(frameworkLower, projectName)
+  } else {
+    await createTutorialTemplate(frameworkLower, projectName)
   }
  
   // Step 5: Find and replace token placeholder in all files
