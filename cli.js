@@ -4,7 +4,7 @@ import chalk from "chalk";
 import { execa } from "execa";
 import { existsSync, promises as fs } from "fs";
 import addSearchFeature from "./lib/search/addSearchFeature.js"
-import { createMinimalTemplate, createTutorialTemplate, replaceTokenInFiles } from "./lib/core/index.js";
+import { createMinimalTemplate, createExampleTemplate, replaceTokenInFiles } from "./lib/core/index.js";
 import open from "open";
 
 
@@ -24,15 +24,17 @@ async function run() {
   const frameworkLower = framework.toLowerCase();
 
   // Step 3: Template Type
-  const { templateType } = await inquirer.prompt([{
+  const { template } = await inquirer.prompt([{
     type: "list",
-    name: "templateType", 
+    name: "template", 
     message: "Choose template type:",
     choices: [
       "Example App - state management, event handling & interactivity.",
       "Minimal App - just a full-screen map"
     ]
   }]);
+
+  const templateType = template.includes('Minimal') ? 'minimal' : 'example';
 
   // Step 2: Project name
   const { projectName } = await inquirer.prompt([
@@ -69,27 +71,31 @@ async function run() {
   ]);
 
   // Step 5: Clone template from tutorials repo OR Minimal framework templates in /templates/
-  if(templateType.includes('Minimal')) {
+  if(templateType === 'minimal') {
     await createMinimalTemplate(frameworkLower, projectName)
   } else {
-    await createTutorialTemplate(frameworkLower, projectName)
+    await createExampleTemplate(frameworkLower, projectName)
+  }
+
+  if (search) {
+    console.log(chalk.gray("\n🔍 Adding Search JS...\n"))
+    try {
+      await addSearchFeature(frameworkLower, templateType, projectName)
+    } catch(err) {
+      console.log("Error trying to add Search JS Template: ", err)
+    }
   }
  
   // Step 6: Find and replace token placeholder in all files
   console.log(chalk.gray("\n🔍 Searching for token placeholder and replacing...\n"));
   await replaceTokenInFiles(projectName, token);
 
-  if (search) {
-    console.log(chalk.gray("\n🔍 Adding Search JS component...\n"))
-    console.log("framework:", frameworkLower)
-    await addSearchFeature(frameworkLower, projectName)
-  }
-
   // Step 6: Install deps
   console.log(chalk.cyan("\n📦 Installing dependencies... (this may take a minute)\n"));
   await execa("npm", ["install"], { cwd: projectName, stdio: "inherit" });
+  
   if (search) {
-     await execa("npm", ["install", "@mapbox/searchjs"], { cwd: projectName, stdio: "inherit" });
+     await execa("npm", ["install", "@mapbox/search-js-react"], { cwd: projectName, stdio: "inherit" });
   }
   // Step 7: Run app
   console.log(chalk.green(`\n🚀 Starting ${framework} dev server...\n`));
