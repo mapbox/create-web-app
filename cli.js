@@ -3,8 +3,8 @@ import inquirer from "inquirer";
 import chalk from "chalk";
 import { execa } from "execa";
 import { existsSync, promises as fs } from "fs";
-import addSearchFeature from "./lib/search/addSearchFeature.js"
-import { createMinimalTemplate, createExampleTemplate, replaceTokenInFiles } from "./lib/core/index.js";
+import { addMapboxGLJS, addSearchFeature } from "./lib/core/addAppFeatures.js"
+import { createViteTemplate, replaceTokenInFiles } from "./lib/core/index.js";
 import open from "open";
 
 
@@ -22,19 +22,6 @@ async function run() {
   ]);
 
   const frameworkLower = framework.toLowerCase();
-
-  // Step 3: Template Type
-  const { template } = await inquirer.prompt([{
-    type: "list",
-    name: "template", 
-    message: "Choose template type:",
-    choices: [
-      "Example App - state management, event handling & interactivity.",
-      "Minimal App - just a full-screen map"
-    ]
-  }]);
-
-  const templateType = template.includes('Minimal') ? 'minimal' : 'example';
 
   // Step 2: Project name
   const { projectName } = await inquirer.prompt([
@@ -71,57 +58,65 @@ async function run() {
   ]);
 
   // Step 5: Clone template from tutorials repo OR Minimal framework templates in /templates/
-  if(templateType === 'minimal') {
-    await createMinimalTemplate(frameworkLower, projectName)
-  } else {
-    await createExampleTemplate(frameworkLower, projectName)
+  try {
+    await createViteTemplate(frameworkLower, projectName)
+    console.log("installed the appropriate vite template")
+  } catch(err) {
+    console.log("There was an error creating the Vite Template: ", error)
+  }
+
+  // Copy Map App Components into Vite Template
+  try {
+    await addMapboxGLJS(frameworkLower, projectName)
+  } catch(err) {
+    console.log("Error copying map components into package:", err)
   }
 
   if (search) {
     console.log(chalk.gray("\n🔍 Adding Search JS...\n"))
     try {
-      await addSearchFeature(frameworkLower, templateType, projectName)
+      await addSearchFeature(frameworkLower, projectName)
     } catch(err) {
       console.log("Error trying to add Search JS Template: ", err)
     }
   }
  
-  // Step 6: Find and replace token placeholder in all files
-  console.log(chalk.gray("\n🔍 Searching for token placeholder and replacing...\n"));
-  await replaceTokenInFiles(projectName, token);
+//   // Step 6: Find and replace token placeholder in all files
+//   console.log(chalk.gray("\n🔍 Searching for token placeholder and replacing...\n"));
+//   await replaceTokenInFiles(projectName, token);
 
-  // Step 6: Install deps
-  console.log(chalk.cyan("\n📦 Installing dependencies... (this may take a minute)\n"));
-  await execa("npm", ["install"], { cwd: projectName, stdio: "inherit" });
+//   // Step 6: Install deps
+//   console.log(chalk.cyan("\n📦 Installing dependencies... (this may take a minute)\n"));
+//   await execa("npm", ["install"], { cwd: projectName, stdio: "inherit" });
   
-  if (search) {
-     await execa("npm", ["install", "@mapbox/search-js-react"], { cwd: projectName, stdio: "inherit" });
+//   if (search) {
+//      await execa("npm", ["install", "@mapbox/search-js-react"], { cwd: projectName, stdio: "inherit" });
+//   }
+//   // Step 7: Run app
+//   console.log(chalk.green(`\n🚀 Starting ${framework} dev server...\n`));
+  
+//   const ports = {
+//     react: 5173,    // Vite
+//     vue: 5173,      // Vite  
+//     svelte: 5173,   // Vite
+//     angular: 4200   // Angular CLI
+//   };
+//   const port = ports[frameworkLower] || 5173;
+
+//   // Open browser after a short delay to let the dev server start
+//   console.log(chalk.green.bold("\n🌐 Browser will open automatically in 3 seconds..."));
+//   console.log(chalk.gray("─".repeat(50)));
+//   setTimeout(async () => {
+//     try {
+//       await open(`http://localhost:${port}`);
+//     } catch (err) {
+//       console.log(chalk.yellow(`⚠️  Could not open browser automatically. Visit http://localhost:${port}`));
+//     }
+//   }, 3000); // 3 second delay
+
+//   const command = frameworkLower === 'angular' ? ["start"] : ["run", "dev"];
+//   await execa("npm", command, { cwd: projectName, stdio: "inherit" });
   }
-  // Step 7: Run app
-  console.log(chalk.green(`\n🚀 Starting ${framework} dev server...\n`));
-  
-  const ports = {
-    react: 5173,    // Vite
-    vue: 5173,      // Vite  
-    svelte: 5173,   // Vite
-    angular: 4200   // Angular CLI
-  };
-  const port = ports[frameworkLower] || 5173;
-
-  // Open browser after a short delay to let the dev server start
-  console.log(chalk.green.bold("\n🌐 Browser will open automatically in 3 seconds..."));
-  console.log(chalk.gray("─".repeat(50)));
-  setTimeout(async () => {
-    try {
-      await open(`http://localhost:${port}`);
-    } catch (err) {
-      console.log(chalk.yellow(`⚠️  Could not open browser automatically. Visit http://localhost:${port}`));
-    }
-  }, 3000); // 3 second delay
-
-  const command = frameworkLower === 'angular' ? ["start"] : ["run", "dev"];
-  await execa("npm", command, { cwd: projectName, stdio: "inherit" });
-}
 
 run().catch((err) => {
   console.error(chalk.red("❌ Something went wrong:"));
