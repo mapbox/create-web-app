@@ -5,7 +5,7 @@ import { SearchBox } from '@mapbox/search-js-react'
 import 'mapbox-gl/dist/mapbox-gl.css';
 import './App.css'
 
-const accessToken = 'YOUR_MAPBOX_ACCESS_TOKEN'
+const accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
 function App() {
 

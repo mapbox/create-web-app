@@ -26,7 +26,7 @@ export class MapComponent implements OnInit, OnDestroy {
     const mapboxgl = (await import('mapbox-gl')).default
   
       this.map = new mapboxgl.Map({
-        accessToken: 'pk.eyJ1IjoiYW5kcmV3c2VwaWMxIiwiYSI6ImNsbzV0NzQwNTAzYjQyd3MwbHVjaXR1cWUifQ.1Puj3xOeBUWw0cITO38elg', // Replace with your Mapbox access token
+        accessToken: process.env['MAPBOX_ACCESS_TOKEN'],
         container: this.mapContainer.nativeElement,
         center:  [-71.05953, 42.36290],
         zoom: 13

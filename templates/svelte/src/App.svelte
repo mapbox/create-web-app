@@ -10,7 +10,7 @@
   onMount(() => {
     map = new Map({
       container: mapContainer,
-      accessToken: 'pk.eyJ1IjoiYW5kcmV3c2VwaWMxIiwiYSI6ImNsbzV0NzQwNTAzYjQyd3MwbHVjaXR1cWUifQ.1Puj3xOeBUWw0cITO38elg',
+      accessToken: import.meta.env.VITE_MAPBOX_ACCESS_TOKEN,
       center: [-71.05953, 42.36290],
       zoom: 13
     });

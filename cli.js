@@ -4,7 +4,7 @@ import chalk from "chalk";
 import { execa } from "execa";
 import { existsSync, promises as fs } from "fs";
 import addSearchFeature from "./lib/search/addSearchFeature.js"
-import { createMinimalTemplate, createExampleTemplate, replaceTokenInFiles } from "./lib/core/index.js";
+import { createTemplate, replaceTokenInFiles } from "./lib/core/index.js";
 import open from "open";
 
 
@@ -23,26 +23,13 @@ async function run() {
 
   const frameworkLower = framework.toLowerCase();
 
-  // Step 3: Template Type
-  const { template } = await inquirer.prompt([{
-    type: "list",
-    name: "template", 
-    message: "Choose template type:",
-    choices: [
-      "Example App - state management, event handling & interactivity.",
-      "Minimal App - just a full-screen map"
-    ]
-  }]);
-
-  const templateType = template.includes('Minimal') ? 'minimal' : 'example';
-
   // Step 2: Project name
   const { projectName } = await inquirer.prompt([
     {
       type: "input",
       name: "projectName",
       message: "Project name:",
-      default: `mapbox-${framework}-app`
+      default: `mapbox-${frameworkLower}-app`
     }
   ]);
 
@@ -70,25 +57,28 @@ async function run() {
     }
   ]);
 
-  // Step 5: Clone template from tutorials repo OR Minimal framework templates in /templates/
-  if(templateType === 'minimal') {
-    await createMinimalTemplate(frameworkLower, projectName)
-  } else {
-    await createExampleTemplate(frameworkLower, projectName)
+  // Step 5: Clone template from  /templates/{framework}
+ try {
+     await createTemplate(frameworkLower, projectName)
+  } catch(err) {
+    console.log("There was a problem cloning the template:", err)
   }
 
   if (search) {
     console.log(chalk.gray("\n🔍 Adding Search JS...\n"))
     try {
-      await addSearchFeature(frameworkLower, templateType, projectName)
+      await addSearchFeature(frameworkLower, projectName)
     } catch(err) {
       console.log("Error trying to add Search JS Template: ", err)
     }
   }
  
   // Step 6: Find and replace token placeholder in all files
-  console.log(chalk.gray("\n🔍 Searching for token placeholder and replacing...\n"));
-  await replaceTokenInFiles(projectName, token);
+  try {
+    await replaceTokenInFiles(projectName, token, frameworkLower);
+  } catch(err) {
+    console.log("Error adding token to env files:", err)
+  }
 
   // Step 6: Install deps
   console.log(chalk.cyan("\n📦 Installing dependencies... (this may take a minute)\n"));
