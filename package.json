@@ -1,5 +1,5 @@
 {
-  "name": "create-mapbox-web-app",
+  "name": "create-mapbox-gljs-app",
   "version": "0.1.0",
   "bin": {
     "create-mapbox-app": "cli.js" 
