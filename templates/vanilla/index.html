@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite, Vanilla JS + Mapbox GL JS</title>
+
+    <!-- Mapbox GL JS -->
+    <link
+      href="https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.css"
+      rel="stylesheet"
+    />
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.js"></script>
+
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+
+    <!-- Map -->
+    <div id="map-container"></div>
+
+    <script type="module">
+      // Mapbox access token
+      mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+     
+      let map;
+
+      /**
+       * Initialize the map
+       */
+      function initMap() {
+        map = new mapboxgl.Map({
+          container: 'map-container',
+          center:  [-71.05953, 42.36290],
+          zoom: 13,
+        });
+
+        map.on('load', () => {
+         console.log("Map is loaded")
+        });
+      }
+
+      initMap();
+    </script>
+  </body>
+</html>
+

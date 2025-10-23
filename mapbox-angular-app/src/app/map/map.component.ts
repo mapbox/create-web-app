@@ -7,7 +7,6 @@ import {  Component,
   signal } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { PLATFORM_ID } from '@angular/core';
-import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-map',
@@ -27,7 +26,7 @@ export class MapComponent implements OnInit, OnDestroy {
     const mapboxgl = (await import('mapbox-gl')).default
   
       this.map = new mapboxgl.Map({
-        accessToken: environment.mapboxAccessToken,
+        accessToken: process.env['MAPBOX_ACCESS_TOKEN'],
         container: this.mapContainer.nativeElement,
         center:  [-71.05953, 42.36290],
         zoom: 13

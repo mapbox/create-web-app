@@ -9,7 +9,7 @@ import open from "open";
 
 
 async function run() {
-  console.log(chalk.cyan.bold("\n🌍 Welcome to create-mapbox-gljs-app!\n"));
+  console.log(chalk.cyan.bold("\n🌍 Welcome to create-mapbox-web-app!\n"));
 
   // Step 1: Framework selection
   const { framework } = await inquirer.prompt([
@@ -17,7 +17,7 @@ async function run() {
       type: "list",
       name: "framework",
       message: "Which framework do you want to use?",
-      choices: ["React", "Vue", "Svelte", "Angular"]
+      choices: ["Vanilla", "React", "Vue", "Svelte", "Angular"]
     }
   ]);
 
@@ -61,7 +61,7 @@ async function run() {
  try {
      await createTemplate(frameworkLower, projectName)
   } catch(err) {
-    console.log("There was a problem cloning the template:", err)
+    console.log(chalk.red.bold("\nThere was a problem cloning the template:", err))
   }
 
   if (search) {
@@ -69,7 +69,7 @@ async function run() {
     try {
       await addSearchFeature(frameworkLower, projectName)
     } catch(err) {
-      console.log("Error trying to add Search JS Template: ", err)
+      console.log(chalk.red.bold("\nError trying to add Search JS Template: ", err))
     }
   }
  
@@ -77,7 +77,7 @@ async function run() {
   try {
     await replaceTokenInFiles(projectName, token, frameworkLower);
   } catch(err) {
-    console.log("Error adding token to env files:", err)
+    console.log(chalk.red.bold("\nError adding token to env files:", err))
   }
 
   // Step 6: Install deps
@@ -85,7 +85,21 @@ async function run() {
   await execa("npm", ["install"], { cwd: projectName, stdio: "inherit" });
   
   if (search) {
-     await execa("npm", ["install", "@mapbox/search-js-react"], { cwd: projectName, stdio: "inherit" });
+    // Install framework-specific search packages
+    const searchPackages = {
+      'react': '@mapbox/search-js-react',
+      'vue': '@mapbox/search-js-web',
+      'svelte': '@mapbox/search-js-web', 
+      'angular': '@mapbox/search-js-web',
+      'vanilla': '@mapbox/search-js-web'
+    };
+    
+    const packageToInstall = searchPackages[frameworkLower] || '@mapbox/search-js-web';
+    try {
+      await execa("npm", ["install", packageToInstall], { cwd: projectName, stdio: "inherit" });
+    } catch(err) {
+      console.log(chalk.red.bold(`\nError trying to install ${packageToInstall}: `, err))
+    }
   }
   // Step 7: Run app
   console.log(chalk.green(`\n🚀 Starting ${framework} dev server...\n`));
@@ -94,7 +108,8 @@ async function run() {
     react: 5173,    // Vite
     vue: 5173,      // Vite  
     svelte: 5173,   // Vite
-    angular: 4200   // Angular CLI
+    angular: 4200,  // Angular CLI
+    vanilla: 5173   // Vite
   };
   const port = ports[frameworkLower] || 5173;
 
