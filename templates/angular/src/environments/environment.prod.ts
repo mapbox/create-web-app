@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  mapboxAccessToken: 'MAPBOX_ACCESS_TOKEN_PLACEHOLDER'
+  mapboxAccessToken: 'YOUR_MAPBOX_ACCESS_TOKEN'
 };

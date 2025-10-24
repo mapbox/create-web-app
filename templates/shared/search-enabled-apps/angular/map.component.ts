@@ -44,8 +44,34 @@ export class MapComponent implements OnInit, OnDestroy {
       zoom: 13
     });
 
-    // Handle map errors
+    // Wait for map to load before adding controls
+    this.map.on('load', () => this.onMapLoad(mapboxgl));
     this.map.on('error', (e: any) => console.error('Map error:', e.error));
+  }
+
+  private async onMapLoad(mapboxgl: any): Promise<void> {
+    if (!this.map) return;
+
+    try {
+      // Dynamically import search library to avoid SSR issues
+      const { MapboxSearchBox } = await import('@mapbox/search-js-web');
+
+      const searchBox = new MapboxSearchBox();
+      searchBox.accessToken = environment.mapboxAccessToken;
+      searchBox.options = {
+        proximity: [-71.05953, 42.36290]
+      };
+      searchBox.marker = true;
+      searchBox.mapboxgl = mapboxgl;
+      searchBox.componentOptions = { 
+        allowReverse: true, 
+        flipCoordinates: true 
+      };
+      
+      this.map.addControl(searchBox as any);
+    } catch (error) {
+      console.error('Error adding search control:', error);
+    }
   }
 
   ngOnDestroy(): void {
