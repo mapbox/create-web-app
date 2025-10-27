@@ -6,6 +6,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import './App.css'
 
 const accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+const center = [-71.05953, 42.36290];
 
 function App() {
 
@@ -18,7 +19,7 @@ function App() {
 
      mapRef.current = new mapboxgl.Map({
       container: mapContainerRef.current,
-      center:  [-71.05953, 42.36290],
+      center:  center,
       zoom: 13,
     });
 
@@ -42,6 +43,7 @@ return (
             map={mapRef.current}
             mapboxgl={mapboxgl}
             value={inputValue}
+            proximity={center}
             onChange={(d) => {
             setInputValue(d);
             }}

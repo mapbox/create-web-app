@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite, Vanilla JS + Mapbox GL JS</title>
+    <title>Vite, Vanilla JS + Mapbox GL JS with Search</title>
     <link rel="icon" type="image/svg+xml" href="https://static-assets.mapbox.com/branding/favicon/v2/favicon-32x32.png?v=gAd4JjrGWl" />
 
     <!-- Mapbox GL JS -->
@@ -13,6 +13,9 @@
       rel="stylesheet"
     />
     <script src="https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.js"></script>
+
+    <!-- Mapbox Search JS Web -->
+     <script id="search-js" defer="" src="https://api.mapbox.com/search-js/v1.5.0/web.js"></script>
 
     <style>
       body {
@@ -38,9 +41,10 @@
 
     <script type="module">
       // Mapbox access token
-      mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+      const accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
      
       let map;
+      let center =  [-71.05953, 42.36290]; // Boston, MA
 
       /**
        * Initialize the map
@@ -48,12 +52,22 @@
       function initMap() {
         map = new mapboxgl.Map({
           container: 'map-container',
-          center:  [-71.05953, 42.36290],
+          accessToken: accessToken,
+          center,
           zoom: 13,
         });
 
         map.on('load', () => {
-         console.log("Map is loaded")
+          const searchBox = new MapboxSearchBox();
+            searchBox.accessToken = accessToken;
+            searchBox.options = {
+                types: 'address,poi',
+                proximity: center
+            };
+            searchBox.marker = true;
+            searchBox.mapboxgl = mapboxgl;
+            searchBox.componentOptions = { allowReverse: true, flipCoordinates: true };
+            map.addControl(searchBox);
         });
       }
 
