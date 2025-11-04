@@ -4,7 +4,7 @@
   "description": "Create Mapbox GL JS web applications with React, Vue, Svelte, Angular, or Vanilla JavaScript",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mapbox/your-repo-name.git"
+    "url": "https://github.com/mapbox/create-web-app.git"
   },
   "keywords": ["mapbox", "mapbox-gl-js", "cli", "create", "scaffold"],
   "author": "Mapbox",
