@@ -10,6 +10,11 @@ Currently supported frameworks:
 - Svelte
 - Angular
 
+## How templates work
+This CLI tools copies full Vite project files from the `/templates/` directory and then creates an `.env` file with the users access token for use in the project. If the [Search JS](https://docs.mapbox.com/mapbox-search-js/) is selected, a corresponding main app file (App.jsx, App.vue etc..) with search functionality implemented is copied from `/templates/shared/search-enabled-apps/` and used to over write the main app file in the newly created project. 
+
+These principle templates and their search counterpart should be maintained and kept as up to date as possible.
+
 ## Mapbox Search JS
 This tool also contains templates to add a [Mapbox Search JS](https://docs.mapbox.com/mapbox-search-js/) search box to the map as well - handling needs for users who wish to integrate interactive search with their map. 
 
