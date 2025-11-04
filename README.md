@@ -4,7 +4,7 @@ This package is a command line tool which allows developers to quickly scaffold 
 
 ## Supported Frameworks
 Currently supported frameworks:
-- Vanilla JS
+- No Framework (HTML, CSS, Vanilla JavaScript)
 - React
 - Vue
 - Svelte
