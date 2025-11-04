@@ -3,12 +3,13 @@ import inquirer from "inquirer";
 import chalk from "chalk";
 import { execa } from "execa";
 import { existsSync, promises as fs } from "fs";
-import { replaceTokenInFiles } from "./replaceToken.js";
+import addSearchFeature from "./lib/search/addSearchFeature.js"
+import { createTemplate, createTokenEnv } from "./lib/core/index.js";
 import open from "open";
 
 
 async function run() {
-  console.log(chalk.cyan.bold("\n🌍 Welcome to create-mapbox-gljs-app!\n"));
+  console.log(chalk.cyan.bold("\n🌍 Welcome to create-mapbox-web-app!\n"));
 
   // Step 1: Framework selection
   const { framework } = await inquirer.prompt([
@@ -16,9 +17,11 @@ async function run() {
       type: "list",
       name: "framework",
       message: "Which framework do you want to use?",
-      choices: ["React", "Vue", "Svelte", "Angular"]
+      choices: ["Vanilla", "React", "Vue", "Svelte", "Angular"]
     }
   ]);
+
+  const frameworkLower = framework.toLowerCase();
 
   // Step 2: Project name
   const { projectName } = await inquirer.prompt([
@@ -26,7 +29,7 @@ async function run() {
       type: "input",
       name: "projectName",
       message: "Project name:",
-      default: `mapbox-${framework}-app`
+      default: `mapbox-${frameworkLower}-app`
     }
   ]);
 
@@ -40,99 +43,108 @@ async function run() {
     {
       type: "input",
       name: "token",
-      message: `Enter your Mapbox Access Token:\n  ${chalk.gray('(Get yours at')} ${chalk.blue.underline('https://console.mapbox.com')}${chalk.gray(')')}`,
-      validate: (val) => val.length > 0 || "Token cannot be empty"
+      message: `Enter your Mapbox Access Token:\n  ${chalk.gray('(Get yours at')} ${chalk.blue.underline('https://console.mapbox.com')}${chalk.gray(') or enter to skip')}`,
+      validate: (val) =>  {
+        if (val.length > 0 && val.startsWith('pk.')) {
+          return true
+        } else if (val.length > 0) {
+          return "Must be a valid Mapbox access token" 
+        } return true}
     }
   ]);
 
-  // Step 4: Clone template from tutorials repo subfolder using git clone
-  const frameworkLower = framework.toLowerCase();
-  const repo = `mapbox/tutorials`;
-  const subfolder = `use-mapbox-gl-js-with-${frameworkLower}`;
-  const repoUrl = `https://github.com/${repo}.git`;
-  const tempDir = `temp-${Date.now()}`;
-  
-  console.log(chalk.gray(`\n📦 Downloading template from ${repo}/${subfolder}...\n`));
-
-  try {
-    // Step 4a: Shallow clone the entire repo
-    console.log(chalk.blue('� Cloning repository...'));
-    await execa('git', ['clone', '--depth', '1', repoUrl, tempDir], {
-      stdio: 'pipe' // Hide git output for cleaner experience
-    });
-
-    // Step 4b: Copy the specific subfolder to project directory
-    console.log(chalk.blue('📁 Extracting template files...'));
-    const { existsSync } = await import('fs');
-    const subfolderPath = `${tempDir}/${subfolder}`;
-    
-    if (!existsSync(subfolderPath)) {
-      throw new Error(`Template folder '${subfolder}' not found in repository`);
+   // Step 4: Search JS
+  const { search } = await inquirer.prompt([
+    {
+      type: "confirm",
+      name: "search",
+      message: "Addons: Add interactive Search to your map?",
     }
+  ]);
 
-    await execa('cp', ['-r', subfolderPath, projectName], { stdio: 'pipe' });
+  // Step 5a: Clone template from  /templates/{framework}
+ try {
+     await createTemplate(frameworkLower, projectName)
+  } catch(err) {
+    console.log(chalk.red.bold("\nThere was a problem cloning the template:", err))
+  }
 
-    // Step 4c: Clean up temporary directory
-    console.log(chalk.blue('🧹 Cleaning up...'));
-    await execa('rm', ['-rf', tempDir], { stdio: 'pipe' });
-
-    console.log(chalk.green('✅ Template downloaded successfully'));
-  } catch (error) {
-    // Clean up temp directory if it exists
+  // Step 5b: 
+  if (search) {
+    console.log(chalk.gray("\n🔍 Adding Search JS...\n"))
     try {
-      await execa('rm', ['-rf', tempDir], { stdio: 'pipe' });
-    } catch (cleanupError) {
-      // Ignore cleanup errors
+      await addSearchFeature(frameworkLower, projectName)
+    } catch(err) {
+      console.log(chalk.red.bold("\nError trying to add Search JS Template: ", err))
     }
-
-    console.log(chalk.red(`\n❌ Failed to download template: ${error.message}`));
-    
-    if (error.message.includes('not found')) {
-      console.log(chalk.yellow(`\n💡 Available framework options:`));
-      console.log(chalk.gray(`   - react`));
-      console.log(chalk.gray(`   - vue`));
-      console.log(chalk.gray(`   - svelte`));
-      console.log(chalk.gray(`   - angular`));
-    } else {
-      console.log(chalk.yellow(`\n💡 This might be a network connectivity issue.`));
-      console.log(chalk.gray(`Make sure you have internet access and git is installed.`));
-    }
-    
-    throw error;
   }
  
-  // Step 5: Find and replace token placeholder in all files
-  console.log(chalk.gray("\n🔍 Searching for token placeholder and replacing...\n"));
-  await replaceTokenInFiles(projectName, token);
+  // Step 6: Create env file to manage accessToken
+  if (token) {
+    try {
+      await createTokenEnv(projectName, token, frameworkLower);
+    } catch(err) {
+      console.log(chalk.red.bold("\nError adding token to env files:", err))
+    }
+  }
+
 
   // Step 6: Install deps
   console.log(chalk.cyan("\n📦 Installing dependencies... (this may take a minute)\n"));
   await execa("npm", ["install"], { cwd: projectName, stdio: "inherit" });
-
-  // Step 7: Run app
-  console.log(chalk.green(`\n🚀 Starting ${framework} dev server...\n`));
   
-  const ports = {
-    react: 5173,    // Vite
-    vue: 5173,      // Vite  
-    svelte: 5173,   // Vite
-    angular: 4200   // Angular CLI
-  };
-  const port = ports[frameworkLower] || 5173;
-
-  // Open browser after a short delay to let the dev server start
-  console.log(chalk.green.bold("\n🌐 Browser will open automatically in 3 seconds..."));
-  console.log(chalk.gray("─".repeat(50)));
-  setTimeout(async () => {
+  if (search) {
+    // Install framework-specific search packages
+    const searchPackages = {
+      'react': '@mapbox/search-js-react',
+      'vue': '@mapbox/search-js-web',
+      'svelte': '@mapbox/search-js-web', 
+      'angular': '@mapbox/search-js-web',
+      'vanilla': '@mapbox/search-js-web'
+    };
+    
+    const packageToInstall = searchPackages[frameworkLower] || '@mapbox/search-js-web';
     try {
-      await open(`http://localhost:${port}`);
-    } catch (err) {
-      console.log(chalk.yellow(`⚠️  Could not open browser automatically. Visit http://localhost:${port}`));
+      await execa("npm", ["install", packageToInstall], { cwd: projectName, stdio: "inherit" });
+    } catch(err) {
+      console.log(chalk.red.bold(`\nError trying to install ${packageToInstall}: `, err))
     }
-  }, 3000); // 3 second delay
+  }
+  
+  // Step 7: Run app (if token is present)
+  if (token) {
+      console.log(chalk.green(`\n🚀 Starting ${framework} dev server...\n`));
+  
+    const ports = {
+      react: 5173,    // Vite
+      vue: 5173,      // Vite  
+      svelte: 5173,   // Vite
+      angular: 4200,  // Angular CLI
+      vanilla: 5173   // Vite
+    };
+    const port = ports[frameworkLower] || 5173;
 
-  const command = frameworkLower === 'angular' ? ["start"] : ["run", "dev"];
-  await execa("npm", command, { cwd: projectName, stdio: "inherit" });
+    // Open browser after a short delay to let the dev server start
+    console.log(chalk.green.bold("\n🌐 Browser will open automatically in 3 seconds..."));
+    console.log(chalk.gray("─".repeat(50)));
+    setTimeout(async () => {
+      try {
+        await open(`http://localhost:${port}`);
+      } catch (err) {
+        console.log(chalk.yellow(`⚠️  Could not open browser automatically. Visit http://localhost:${port}`));
+      }
+    }, 3000); // 3 second delay
+
+    const command = frameworkLower === 'angular' ? ["start"] : ["run", "dev"];
+    await execa("npm", command, { cwd: projectName, stdio: "inherit" });
+
+  } else {
+    // If no Token was provided 
+    const commandRaw = frameworkLower === 'angular' ? 'start' : 'run dev';
+
+    console.log(chalk.green(`🚀 Launch your app: \n 1. Create your .env file by copying the .env.sample in ${chalk.gray(`${projectName}`)} \n 2. Add your Mapbox access token to the .env file \n 3. Start your local your app by ${chalk.gray(`cd`)}'ing into your project folder and running ${chalk.gray(`npm ${commandRaw}`)}`));
+  }
+
 }
 
 run().catch((err) => {
