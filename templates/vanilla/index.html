@@ -2,63 +2,14 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite, Vanilla JS + Mapbox GL JS</title>
     <link rel="icon" type="image/svg+xml" href="https://static-assets.mapbox.com/branding/favicon/v2/favicon-32x32.png?v=gAd4JjrGWl" />
-
-    <!-- Mapbox GL JS -->
-    <link
-      href="https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.css"
-      rel="stylesheet"
-    />
-    <script src="https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.js"></script>
-
-    <style>
-      body {
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        margin: 0;
-        padding: 0;
-      }
-
-      #map-container {
-        height: 100%;
-        width: 100%;
-      }
-    </style>
   </head>
   <body>
-
     <!-- Map -->
     <div id="map-container"></div>
-
-    <script type="module">
-      // Mapbox access token
-      mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
-     
-      let map;
-
-      /**
-       * Initialize the map
-       */
-      function initMap() {
-        map = new mapboxgl.Map({
-          container: 'map-container',
-          center:  [-71.05953, 42.36290],
-          zoom: 13,
-        });
-
-        map.on('load', () => {
-         console.log("Map is loaded")
-        });
-      }
-
-      initMap();
-    </script>
+    <script type="module" src="/src/main.js"></script>
   </body>
 </html>
 
