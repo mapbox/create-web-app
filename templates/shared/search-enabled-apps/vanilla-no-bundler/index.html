@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vanilla JS + Mapbox GL JS + Search (No Bundler)</title>
+    <link rel="icon" type="image/svg+xml" href="https://static-assets.mapbox.com/branding/favicon/v2/favicon-32x32.png?v=gAd4JjrGWl" />
+    
+    <!-- Mapbox GL JS CSS -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.css" rel="stylesheet">
+    
+    <!-- Mapbox Search JS CSS -->
+    <link rel="stylesheet" href="https://api.mapbox.com/search-js/v1.5.0/web.css">
+    
+    <style>
+        body {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            margin: 0;
+            padding: 0;
+        }
+
+        #map-container {
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <!-- Map container -->
+    <div id="map-container"></div>
+
+    <!-- Mapbox GL JS -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.15.0/mapbox-gl.js"></script>
+    
+    <!-- Mapbox Search JS -->
+    <script src="https://api.mapbox.com/search-js/v1.5.0/web.js"></script>
+    
+    <script>
+        // Mapbox access token
+        mapboxgl.accessToken = 'your_mapbox_access_token_here';
+
+        let map;
+        let center = [-71.05953, 42.36290]; // Boston, MA
+
+        /**
+         * Initialize the map
+         */
+        function initMap() {
+            map = new mapboxgl.Map({
+                container: 'map-container',
+                center: center,
+                zoom: 13,
+            });
+
+            map.on('load', () => {
+                console.log("Map is loaded");
+                
+                // Initialize search box
+                const searchBox = new mapboxsearch.MapboxSearchBox();
+                searchBox.accessToken = mapboxgl.accessToken;
+                searchBox.options = {
+                    types: 'address,poi',
+                    proximity: center
+                };
+                searchBox.marker = true;
+                searchBox.mapboxgl = mapboxgl;
+                searchBox.componentOptions = { 
+                    allowReverse: true, 
+                    flipCoordinates: true 
+                };
+                
+                // Add the search control to the map
+                map.addControl(searchBox);
+                
+                console.log("Search box added to map");
+            });
+        }
+
+        // Initialize the map when the page loads
+        initMap();
+    </script>
+</body>
+</html>

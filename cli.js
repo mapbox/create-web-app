@@ -17,11 +17,16 @@ async function run() {
       type: "list",
       name: "framework",
       message: "Which framework do you want to use?",
-      choices: ["Vanilla", "React", "Vue", "Svelte", "Angular"]
+      choices: ["Vanilla", "Vanilla (No Bundler)", "React", "Vue", "Svelte", "Angular"]
     }
   ]);
 
-  const frameworkLower = framework.toLowerCase();
+  let frameworkLower = framework.toLowerCase();
+  
+  // Handle the special case for "Vanilla (No Bundler)"
+  if (framework === "Vanilla (No Bundler)") {
+    frameworkLower = "vanilla-no-bundler";
+  }
 
   // Step 2: Project name
   const { projectName } = await inquirer.prompt([
@@ -100,7 +105,8 @@ async function run() {
       'vue': '@mapbox/search-js-web',
       'svelte': '@mapbox/search-js-web', 
       'angular': '@mapbox/search-js-web',
-      'vanilla': '@mapbox/search-js-web'
+      'vanilla': '@mapbox/search-js-web',
+      'vanilla-no-bundler': '@mapbox/search-js-web'
     };
     
     const packageToInstall = searchPackages[frameworkLower] || '@mapbox/search-js-web';
@@ -120,7 +126,8 @@ async function run() {
       vue: 5173,      // Vite  
       svelte: 5173,   // Vite
       angular: 4200,  // Angular CLI
-      vanilla: 5173   // Vite
+      vanilla: 5173,  // Vite
+      'vanilla-no-bundler': 5173   // live-server
     };
     const port = ports[frameworkLower] || 5173;
 

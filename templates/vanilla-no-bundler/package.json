@@ -1,0 +1,11 @@
+{
+  "name": "vanilla-no-bundler",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "live-server --port=5174 --open=/"
+  },
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+}
