@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "dev": "live-server --port=5174 --open=/"
+    "dev": "live-server --port=5174 --no-browser"
   },
   "devDependencies": {
     "live-server": "^1.2.2"
