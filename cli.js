@@ -149,7 +149,11 @@ async function run() {
     // If no Token was provided 
     const commandRaw = frameworkLower === 'angular' ? 'start' : 'run dev';
 
-    console.log(chalk.green(`🚀 Launch your app: \n 1. Create your .env file by copying the .env.sample in ${chalk.gray(`${projectName}`)} \n 2. Add your Mapbox access token to the .env file \n 3. Start your local your app by ${chalk.gray(`cd`)}'ing into your project folder and running ${chalk.gray(`npm ${commandRaw}`)}`));
+    if (frameworkLower === 'vanilla-no-bundler') {
+      console.log(chalk.green(`🚀 Launch your app: \n 1. Add your Mapbox access token to the ${chalk.gray('index.html')} file in ${chalk.gray(`${projectName}`)} (replace the ${chalk.gray('\'your_mapbox_access_token_here\'')} placeholder with your access token) \n 2. Start your app by ${chalk.gray(`cd`)}'ing into your project folder and running ${chalk.gray('npm run dev')}`));
+    } else {
+      console.log(chalk.green(`🚀 Launch your app: \n 1. Create your .env file by copying the .env.sample in ${chalk.gray(`${projectName}`)} \n 2. Add your Mapbox access token to the .env file \n 3. Start your local your app by ${chalk.gray(`cd`)}'ing into your project folder and running ${chalk.gray(`npm ${commandRaw}`)}`));
+    }
   }
 
 }
