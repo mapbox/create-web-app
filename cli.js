@@ -127,7 +127,7 @@ async function run() {
       svelte: 5173,   // Vite
       angular: 4200,  // Angular CLI
       vanilla: 5173,  // Vite
-      'vanilla-no-bundler': 5173   // live-server
+      'vanilla-no-bundler': 5174   // live-server
     };
     const port = ports[frameworkLower] || 5173;
 
