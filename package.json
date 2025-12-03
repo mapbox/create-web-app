@@ -1,0 +1,32 @@
+{
+  "name": "@mapbox/create-web-app",
+  "version": "0.1.1",
+  "description": "Create Mapbox GL JS web applications with React, Vue, Svelte, Angular, or Vanilla JavaScript",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mapbox/create-web-app.git"
+  },
+  "keywords": [
+    "mapbox",
+    "mapbox-gl-js",
+    "cli",
+    "create",
+    "scaffold"
+  ],
+  "author": "Mapbox",
+  "license": "MIT",
+  "bin": {
+    "create-web-app": "cli.js"
+  },
+  "type": "module",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "inquirer": "^9.2.7",
+    "execa": "^9.0.0",
+    "glob": "^10.3.0",
+    "open": "^9.1.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

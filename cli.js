@@ -1,0 +1,165 @@
+#!/usr/bin/env node
+import inquirer from "inquirer";
+import chalk from "chalk";
+import { execa } from "execa";
+import { existsSync, promises as fs } from "fs";
+import addSearchFeature from "./lib/search/addSearchFeature.js"
+import { createTemplate, createTokenEnv } from "./lib/core/index.js";
+import open from "open";
+
+
+async function run() {
+  console.log(chalk.cyan.bold("\n🌍 Welcome to create-mapbox-web-app!\n"));
+
+  // Step 1: Framework selection
+  const { framework } = await inquirer.prompt([
+    {
+      type: "list",
+      name: "framework",
+      message: "Which framework do you want to use?",
+      choices: ["Vanilla", "Vanilla (No Bundler)", "React", "Vue", "Svelte", "Angular"]
+    }
+  ]);
+
+  let frameworkLower = framework.toLowerCase();
+  
+  // Handle the special case for "Vanilla (No Bundler)"
+  if (framework === "Vanilla (No Bundler)") {
+    frameworkLower = "vanilla-no-bundler";
+  }
+
+  // Step 2: Project name
+  const { projectName } = await inquirer.prompt([
+    {
+      type: "input",
+      name: "projectName",
+      message: "Project name:",
+      default: `mapbox-${frameworkLower}-app`
+    }
+  ]);
+
+  if (existsSync(projectName)) {
+    console.error(chalk.red(`❌ Folder ${projectName} already exists.`));
+    process.exit(1);
+  }
+
+  // Step 3: Mapbox token
+  const { token } = await inquirer.prompt([
+    {
+      type: "input",
+      name: "token",
+      message: `Enter your Mapbox Access Token:\n  ${chalk.gray('(Get yours at')} ${chalk.blue.underline('https://console.mapbox.com')}${chalk.gray(') or enter to skip')}`,
+      validate: (val) =>  {
+        if (val.length > 0 && val.startsWith('pk.')) {
+          return true
+        } else if (val.length > 0) {
+          return "Must be a valid Mapbox access token" 
+        } return true}
+    }
+  ]);
+
+   // Step 4: Search JS
+  const { search } = await inquirer.prompt([
+    {
+      type: "confirm",
+      name: "search",
+      message: "Addons: Add interactive Search to your map?",
+    }
+  ]);
+
+  // Step 5a: Clone template from  /templates/{framework}
+ try {
+     await createTemplate(frameworkLower, projectName)
+  } catch(err) {
+    console.log(chalk.red.bold("\nThere was a problem cloning the template:", err))
+  }
+
+  // Step 5b: 
+  if (search) {
+    console.log(chalk.gray("\n🔍 Adding Search JS...\n"))
+    try {
+      await addSearchFeature(frameworkLower, projectName)
+    } catch(err) {
+      console.log(chalk.red.bold("\nError trying to add Search JS Template: ", err))
+    }
+  }
+ 
+  // Step 6: Create env file to manage accessToken
+  if (token) {
+    try {
+      await createTokenEnv(projectName, token, frameworkLower);
+    } catch(err) {
+      console.log(chalk.red.bold("\nError adding token to env files:", err))
+    }
+  }
+
+
+  // Step 6: Install deps
+  console.log(chalk.cyan("\n📦 Installing dependencies... (this may take a minute)\n"));
+  await execa("npm", ["install"], { cwd: projectName, stdio: "inherit" });
+  
+  if (search) {
+    // Install framework-specific search packages
+    const searchPackages = {
+      'react': '@mapbox/search-js-react',
+      'vue': '@mapbox/search-js-web',
+      'svelte': '@mapbox/search-js-web', 
+      'angular': '@mapbox/search-js-web',
+      'vanilla': '@mapbox/search-js-web',
+      'vanilla-no-bundler': '@mapbox/search-js-web'
+    };
+    
+    const packageToInstall = searchPackages[frameworkLower] || '@mapbox/search-js-web';
+    try {
+      await execa("npm", ["install", packageToInstall], { cwd: projectName, stdio: "inherit" });
+    } catch(err) {
+      console.log(chalk.red.bold(`\nError trying to install ${packageToInstall}: `, err))
+    }
+  }
+  
+  // Step 7: Run app (if token is present)
+  if (token) {
+      console.log(chalk.green(`\n🚀 Starting ${framework} dev server...\n`));
+  
+    const ports = {
+      react: 5173,    // Vite
+      vue: 5173,      // Vite  
+      svelte: 5173,   // Vite
+      angular: 4200,  // Angular CLI
+      vanilla: 5173,  // Vite
+      'vanilla-no-bundler': 5174   // live-server
+    };
+    const port = ports[frameworkLower] || 5173;
+
+    // Open browser after a short delay to let the dev server start
+    console.log(chalk.green.bold("\n🌐 Browser will open automatically in 3 seconds..."));
+    console.log(chalk.gray("─".repeat(50)));
+    setTimeout(async () => {
+      try {
+        await open(`http://localhost:${port}`);
+      } catch (err) {
+        console.log(chalk.yellow(`⚠️  Could not open browser automatically. Visit http://localhost:${port}`));
+      }
+    }, 3000); // 3 second delay
+
+    const command = frameworkLower === 'angular' ? ["start"] : ["run", "dev"];
+    await execa("npm", command, { cwd: projectName, stdio: "inherit" });
+
+  } else {
+    // If no Token was provided 
+    const commandRaw = frameworkLower === 'angular' ? 'start' : 'run dev';
+
+    if (frameworkLower === 'vanilla-no-bundler') {
+      console.log(chalk.green(`🚀 Launch your app: \n 1. Add your Mapbox access token to the ${chalk.gray('index.html')} file in ${chalk.gray(`${projectName}`)} (replace the ${chalk.gray('\'your_mapbox_access_token_here\'')} placeholder with your access token) \n 2. Start your app by ${chalk.gray(`cd`)}'ing into your project folder and running ${chalk.gray('npm run dev')}`));
+    } else {
+      console.log(chalk.green(`🚀 Launch your app: \n 1. Create your .env file by copying the .env.sample in ${chalk.gray(`${projectName}`)} \n 2. Add your Mapbox access token to the .env file \n 3. Start your local your app by ${chalk.gray(`cd`)}'ing into your project folder and running ${chalk.gray(`npm ${commandRaw}`)}`));
+    }
+  }
+
+}
+
+run().catch((err) => {
+  console.error(chalk.red("❌ Something went wrong:"));
+  console.error(err);
+  process.exit(1);
+});
