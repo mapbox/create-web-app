@@ -5,7 +5,7 @@ import { readFile } from 'fs/promises';
 /**
  * Fetch and parse JSON from a remote URL
  */
-export function fetchRemoteFile(url) {
+export async function fetchRemoteFile(url) {
   return fetch(url)
     .then(res => res.json())
     .catch(err => {

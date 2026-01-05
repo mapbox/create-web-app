@@ -93,7 +93,10 @@ async function handleUpdateMode(templatesWithChanges) {
   for (const template of templatesToUpdate) {
     // Use CDN updater for vanilla-no-bundler, regular updater for others
     if (template.template === 'vanilla-no-bundler') {
-      await applyCDNUpdates(template.localPath, template.updates);
+      // CDN checker returns fileResults array - update each file
+      for (const fileResult of template.fileResults) {
+        await applyCDNUpdates(fileResult.localPath, fileResult.updates);
+      }
     } else {
       await applyUpdates(template.localPath, template.updates);
     }
