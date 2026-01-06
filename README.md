@@ -27,6 +27,8 @@ mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
 
 If you'd prefer to add your own `.env` file and manually set your token, you can do so by using the `.env.example` as a template.
 
+## Updates
+For maintainers: templates in this CLI tool can be updated by running `node scripts/check-template-updates.js`. For more information see [UPDATE.md](/UPDATE.md)
 
 
 
