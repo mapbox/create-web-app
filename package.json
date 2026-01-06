@@ -1,6 +1,6 @@
 {
   "name": "@mapbox/create-web-app",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Create Mapbox GL JS web applications with React, Vue, Svelte, Angular, or Vanilla JavaScript",
   "repository": {
     "type": "git",
