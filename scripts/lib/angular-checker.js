@@ -20,6 +20,44 @@ async function getNpmLatestVersion(packageName) {
 }
 
 /**
+ * Parse a semver range like ">=5.9 <6.0" and return { min, max } as [major, minor] tuples.
+ * Returns null bounds for parts that aren't present.
+ */
+function parseVersionRange(range) {
+  const upper = range.match(/<\s*(\d+)(?:\.(\d+))?/);
+  const lower = range.match(/>=\s*(\d+)(?:\.(\d+))?/);
+  return {
+    maxMajor: upper ? parseInt(upper[1]) : Infinity,
+    maxMinor: upper?.[2] !== undefined ? parseInt(upper[2]) : Infinity,
+    minMajor: lower ? parseInt(lower[1]) : 0,
+    minMinor: lower?.[2] !== undefined ? parseInt(lower[2]) : 0,
+  };
+}
+
+function versionSatisfies(version, { minMajor, minMinor, maxMajor, maxMinor }) {
+  const [maj, min] = version.split('.').map(Number);
+  const aboveMin = maj > minMajor || (maj === minMajor && min >= minMinor);
+  const belowMax = maj < maxMajor || (maj === maxMajor && min < maxMinor);
+  return aboveMin && belowMax;
+}
+
+/**
+ * Fetch the latest stable version of a package satisfying a semver range string.
+ */
+async function getNpmLatestVersionSatisfying(packageName, constraint) {
+  try {
+    const data = await fetchRemoteFile(`https://registry.npmjs.org/${packageName}`);
+    const bounds = parseVersionRange(constraint);
+    const stable = Object.keys(data.versions).filter(v => !v.includes('-'));
+    const match = stable.reverse().find(v => versionSatisfies(v, bounds));
+    return match || null;
+  } catch (err) {
+    console.error(chalk.dim(`  ⚠️  Could not fetch ${packageName}: ${err.message}`));
+    return null;
+  }
+}
+
+/**
  * Check Angular template dependencies against npm registry
  */
 export async function checkAngularDependencies(currentMapboxGl) {
@@ -36,6 +74,18 @@ export async function checkAngularDependencies(currentMapboxGl) {
       ...local.devDependencies
     };
     
+    // Fetch @angular-devkit/build-angular peer deps once to constrain TypeScript resolution
+    const buildAngularVersion = local.devDependencies?.['@angular-devkit/build-angular']?.replace(/^[\^~]/, '');
+    let typescriptConstraint = null;
+    if (buildAngularVersion) {
+      try {
+        const buildAngularMeta = await fetchRemoteFile(`https://registry.npmjs.org/@angular-devkit/build-angular/${buildAngularVersion}`);
+        typescriptConstraint = buildAngularMeta.peerDependencies?.typescript || null;
+      } catch {
+        // fall through to unconstrained latest
+      }
+    }
+
     // Check each dependency
     for (const [packageName, currentVersion] of Object.entries(allDeps)) {
       // Special handling for mapbox-gl - use provided version
@@ -53,8 +103,10 @@ export async function checkAngularDependencies(currentMapboxGl) {
         continue;
       }
       
-      // Fetch latest version from npm
-      const latestVersion = await getNpmLatestVersion(packageName);
+      // For TypeScript, respect @angular-devkit/build-angular's peer dep constraint
+      const latestVersion = (packageName === 'typescript' && typescriptConstraint)
+        ? await getNpmLatestVersionSatisfying('typescript', typescriptConstraint)
+        : await getNpmLatestVersion(packageName);
       
       if (!latestVersion) continue;
       
