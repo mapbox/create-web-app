@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "react": "^19.2.6",
-    "react-dom": "^19.2.6"
+    "react-dom": "^19.2.6",
+    "mapbox-gl": "^3.22.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
