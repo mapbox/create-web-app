@@ -17,7 +17,7 @@ async function run() {
       type: "list",
       name: "framework",
       message: "Which framework do you want to use?",
-      choices: ["Vanilla", "Vanilla (No Bundler)", "React", "Vue", "Svelte", "Angular"]
+      choices: ["Vanilla", "Vanilla (No Bundler)", "React", "React TS", "Vue", "Svelte", "Angular"]
     }
   ]);
 
@@ -122,7 +122,8 @@ async function run() {
       console.log(chalk.green(`\n🚀 Starting ${framework} dev server...\n`));
   
     const ports = {
-      react: 5173,    // Vite
+      react: 5173, // Vite
+      'react-ts': 5173, // Vite
       vue: 5173,      // Vite  
       svelte: 5173,   // Vite
       angular: 4200,  // Angular CLI
