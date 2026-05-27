@@ -26,6 +26,8 @@ async function run() {
   // Handle the special case for "Vanilla (No Bundler)"
   if (framework === "Vanilla (No Bundler)") {
     frameworkLower = "vanilla-no-bundler";
+  } else if (framework === "React TS") {
+    frameworkLower = "react-ts"
   }
 
   // Step 2: Project name
