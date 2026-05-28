@@ -40,7 +40,9 @@ function App() {
                 map={mapRef.current}
                 mapboxgl={mapboxgl}
                 value={inputValue}
-                proximity={center}
+                options={{
+                  proximity: center
+                }}
                 onChange={(d) => {
                     setInputValue(d);
                 }}

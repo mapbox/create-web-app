@@ -104,6 +104,7 @@ async function run() {
     // Install framework-specific search packages
     const searchPackages = {
       'react': '@mapbox/search-js-react',
+      'react-ts': '@mapbox/search-js-react',
       'vue': '@mapbox/search-js-web',
       'svelte': '@mapbox/search-js-web', 
       'angular': '@mapbox/search-js-web',
