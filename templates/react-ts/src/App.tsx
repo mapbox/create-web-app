@@ -9,10 +9,10 @@ function App() {
   const mapContainerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const token = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
 
     mapRef.current = new mapboxgl.Map({
-      accessToken: token,
+      accessToken: import.meta.env.VITE_MAPBOX_ACCESS_TOKEN,
+      style: 'mapbox://styles/mapbox/standard',
       container: mapContainerRef.current!,
       center: [-71.05953, 42.36290],
       zoom: 13,

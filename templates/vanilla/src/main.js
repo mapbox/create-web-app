@@ -3,9 +3,6 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import './main.css';
 
-// Mapbox access token
-mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
-
 let map;
 
 /**
@@ -14,6 +11,8 @@ let map;
 function initMap() {
     map = new mapboxgl.Map({
         container: 'map-container',
+        accessToken: import.meta.env.VITE_MAPBOX_ACCESS_TOKEN,
+        style: 'mapbox://styles/mapbox/standard',
         center: [-71.05953, 42.36290],
         zoom: 13,
     });
