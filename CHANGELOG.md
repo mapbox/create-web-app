@@ -1,4 +1,10 @@
+## 0.4.0
+
+- Added React Typescript Template tool
+- Updates to each template to adopt `accessToken` passed via `Map` options, and explicit declaration of style.
+
 ## 0.3.0
+
 - Updated all templates to latest Vite template dependencies and Mapbox dependencies
 - Added conditional dependency checks in update script for Angular projects to ensure cross package alignment with Typescript v.
 - Updated core packages to remove security vulnerabilities
