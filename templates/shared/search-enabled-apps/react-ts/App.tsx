@@ -16,6 +16,7 @@ function App() {
   useEffect(() => {
     mapRef.current = new mapboxgl.Map({
       accessToken,
+      style: 'mapbox://styles/mapbox/standard',
       container: mapContainerRef.current!,
       center,
       zoom: 13,

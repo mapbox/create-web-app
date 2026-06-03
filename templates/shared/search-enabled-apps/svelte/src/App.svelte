@@ -12,6 +12,7 @@
     map = new mapboxgl.Map({
       container: mapContainer,
       accessToken,
+      style: 'mapbox://styles/mapbox/standard',
       center: [-71.05953, 42.36290],
       zoom: 13
     });

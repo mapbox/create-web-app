@@ -15,9 +15,10 @@ function App() {
   const [inputValue, setInputValue] = useState("");
 
   useEffect(() => {
-    mapboxgl.accessToken = accessToken
 
      mapRef.current = new mapboxgl.Map({
+      accessToken,
+      style: 'mapbox://styles/mapbox/standard',
       container: mapContainerRef.current,
       center:  center,
       zoom: 13,

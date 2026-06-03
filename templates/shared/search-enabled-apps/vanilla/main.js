@@ -15,7 +15,8 @@ let center = [-71.05953, 42.36290]; // Boston, MA
 function initMap() {
     map = new mapboxgl.Map({
         container: 'map-container',
-        accessToken: accessToken,
+        accessToken,
+        style: 'mapbox://styles/mapbox/standard',
         center,
         zoom: 13,
     });

@@ -14,7 +14,7 @@ export default {
 
     const map = new mapboxgl.Map({
       container: this.$refs.mapContainer,
-      accessToken: accessToken,
+      accessToken,
       style: "mapbox://styles/mapbox/standard",
       center:  [-71.05953, 42.36290],
       zoom: 13,
