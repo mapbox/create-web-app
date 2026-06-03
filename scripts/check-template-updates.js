@@ -17,6 +17,7 @@ import { promptUpdateStrategy, promptSelectTemplates, promptConfirmUpdate } from
 // Map local template folder to Vite upstream template folder
 const TEMPLATE_CONFIG = {
   react: 'template-react',
+  'react-ts': 'template-react-ts',
   vue: 'template-vue',
   svelte: 'template-svelte',
   vanilla: 'template-vanilla',
@@ -24,7 +25,7 @@ const TEMPLATE_CONFIG = {
 };
 
 // All templates to check (including non-Vite)
-const ALL_TEMPLATES = ['react', 'vue', 'svelte', 'vanilla', 'angular', 'vanilla-no-bundler'];
+const ALL_TEMPLATES = ['react', 'react-ts', 'vue', 'svelte', 'vanilla', 'angular', 'vanilla-no-bundler'];
 
 const UPDATE_MODE = process.argv.includes('--update');
 

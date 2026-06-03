@@ -6,6 +6,7 @@ This package is a command line tool which allows developers to quickly scaffold 
 Currently supported frameworks:
 - No Framework (HTML, CSS, Vanilla JavaScript)
 - React
+- React TS
 - Vue
 - Svelte
 - Angular

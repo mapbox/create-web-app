@@ -11,6 +11,7 @@
     map = new Map({
       container: mapContainer,
       accessToken: import.meta.env.VITE_MAPBOX_ACCESS_TOKEN,
+      style: 'mapbox://styles/mapbox/standard',
       center: [-71.05953, 42.36290],
       zoom: 13
     });

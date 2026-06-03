@@ -6,14 +6,13 @@
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 
-mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
-
 export default {
   mounted() {
 
     const map = new mapboxgl.Map({
       container: this.$refs.mapContainer,
-      style: "mapbox://styles/mapbox/standard",
+      accessToken: import.meta.env.VITE_MAPBOX_ACCESS_TOKEN,
+      style: 'mapbox://styles/mapbox/standard',
       center:  [-71.05953, 42.36290],
       zoom: 13,
     });

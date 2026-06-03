@@ -40,6 +40,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.map = new mapboxgl.Map({
       accessToken: environment.mapboxAccessToken,
       container: this.mapContainer.nativeElement,
+      style: 'mapbox://styles/mapbox/standard',
       center: [-71.05953, 42.36290],
       zoom: 13
     });

@@ -41,7 +41,7 @@
     
     <script>
         // Mapbox access token
-        mapboxgl.accessToken = 'your_mapbox_access_token_here';
+        const accessToken = 'your_mapbox_access_token_here';
 
         let map;
         let center = [-71.05953, 42.36290]; // Boston, MA
@@ -52,6 +52,8 @@
         function initMap() {
             map = new mapboxgl.Map({
                 container: 'map-container',
+                accessToken,
+                style: 'mapbox://styles/mapbox/standard',
                 center: center,
                 zoom: 13,
             });
@@ -61,7 +63,7 @@
                 
                 // Initialize search box
                 const searchBox = new mapboxsearch.MapboxSearchBox();
-                searchBox.accessToken = mapboxgl.accessToken;
+                searchBox.accessToken = accessToken;
                 searchBox.options = {
                     types: 'address,poi',
                     proximity: center

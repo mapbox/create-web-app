@@ -17,7 +17,7 @@ async function run() {
       type: "list",
       name: "framework",
       message: "Which framework do you want to use?",
-      choices: ["Vanilla", "Vanilla (No Bundler)", "React", "Vue", "Svelte", "Angular"]
+      choices: ["Vanilla", "Vanilla (No Bundler)", "React", "React TS", "Vue", "Svelte", "Angular"]
     }
   ]);
 
@@ -26,6 +26,8 @@ async function run() {
   // Handle the special case for "Vanilla (No Bundler)"
   if (framework === "Vanilla (No Bundler)") {
     frameworkLower = "vanilla-no-bundler";
+  } else if (framework === "React TS") {
+    frameworkLower = "react-ts"
   }
 
   // Step 2: Project name
@@ -102,6 +104,7 @@ async function run() {
     // Install framework-specific search packages
     const searchPackages = {
       'react': '@mapbox/search-js-react',
+      'react-ts': '@mapbox/search-js-react',
       'vue': '@mapbox/search-js-web',
       'svelte': '@mapbox/search-js-web', 
       'angular': '@mapbox/search-js-web',
@@ -122,7 +125,8 @@ async function run() {
       console.log(chalk.green(`\n🚀 Starting ${framework} dev server...\n`));
   
     const ports = {
-      react: 5173,    // Vite
+      react: 5173, // Vite
+      'react-ts': 5173, // Vite
       vue: 5173,      // Vite  
       svelte: 5173,   // Vite
       angular: 4200,  // Angular CLI
